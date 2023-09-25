@@ -3,7 +3,8 @@
 
 #include <stdlib.h>
 #include "lenet.h"
-#include "cnnapi_base.h"
+#include "cnnapi.h"
+#include "utils.h"
 
 
 void lenet_forward(LeNet5 *lenet, Feature *features);

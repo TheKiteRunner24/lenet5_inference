@@ -28,12 +28,12 @@ static inline void load_input(Feature *features, image input)
 }
 
 
-static uint8 get_result(Feature *features, uint8 count)
+static uint8_t get_result(Feature *features, uint8_t count)
 {
 	double *output = (double *)features->output_f; 
-	uint8 result = 0;
+	uint8_t result = 0;
 	double maxvalue = *output;
-	for (uint8 i = 1; i < count; ++i)
+	for (uint8_t i = 1; i < count; ++i)
 	{
 		if (output[i] > maxvalue)
 		{
@@ -45,7 +45,7 @@ static uint8 get_result(Feature *features, uint8 count)
 }
 
 
-uint8 Predict(LeNet5 *lenet, image input, uint8 count)
+uint8_t Predict(LeNet5 *lenet, image input, uint8_t count)
 {
 	Feature features = { 0 };
 	load_input(&features, input);

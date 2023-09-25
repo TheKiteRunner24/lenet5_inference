@@ -1,20 +1,20 @@
 #include "lenet_forward.h"
-#include "utils.h"
 
-int8 ReLU(int8 x)
+
+int8_t ReLU(int8_t x)
 {
 	if(x < 0){
         return 0;
     }
     else{
-        return (int8)x;
+        return x;
     }
 }
 
 
-void prepare_conv_data(const int8* input, int inputRows, int inputCols,
+void prepare_conv_data(const int8_t* input, int inputRows, int inputCols,
                          int kernelRows, int kernelCols,
-                         int8* input_prepared){
+                         int8_t* input_prepared){
 
     int outputRows = inputRows - kernelRows + 1;
     int outputCols = inputCols - kernelCols + 1;
@@ -31,7 +31,7 @@ void prepare_conv_data(const int8* input, int inputRows, int inputCols,
     }
 }
 
-double quantize(double* input, int len, int8* output){
+double quantize(double* input, int len, int8_t* output){
 
     double min = input[0];
     double max = input[0];
@@ -49,7 +49,7 @@ double quantize(double* input, int len, int8* output){
     double scale = absmax / 127;
 
     for(int i = 0; i < len; i++){
-        output[i] = (int8)(input[i] / scale);
+        output[i] = (int8_t)(input[i] / scale);
     }
 
     return scale;
@@ -59,7 +59,7 @@ void lenet_forward(LeNet5 *lenet, Feature *features)
 {
     // 量化输入图像到int8
     double* inf = (double*)features->input;
-    int8* inq = (int8*)features->input_q;
+    int8_t* inq = (int8_t*)features->input_q;
     double in_scale = quantize(inf, 6*32*32, inq);
 
 	// 卷积层1 ============================================================================================
@@ -67,18 +67,18 @@ void lenet_forward(LeNet5 *lenet, Feature *features)
 	for (int x = 0; x < 1; ++x) {  //1个图像
 		for (int y = 0; y < 6; ++y) {  //6个卷积核
 
-			int8* input = (int8*)features->input_q[x];
-			int8* kernel = (int8*)lenet->weight0_1[x][y];
-			int32* output = (int32*)features->layer1[y];
+			int8_t* input = (int8_t*)features->input_q[x];
+			int8_t* kernel = (int8_t*)lenet->weight0_1[x][y];
+			int32_t* output = (int32_t*)features->layer1[y];
 			
 			//输入图像加了padding变成32*32
 			int input_size = (32-5+1) * (32-5+1) * 25;
             int kernel_size = 25;
 
-			int8* input_prepared= (int8*)calloc(input_size, sizeof(int8));
+			int8_t* input_prepared= (int8_t*)calloc(input_size, sizeof(int8_t));
 
 			prepare_conv_data(input, 32, 32, 5, 5, input_prepared);
-			convolution_valid(input_prepared, input_size, kernel, kernel_size, output);
+			convolution(input_prepared, input_size, kernel, kernel_size, output);
 
 			free(input_prepared);
 		}
@@ -88,7 +88,7 @@ void lenet_forward(LeNet5 *lenet, Feature *features)
     // r = q * S
     for (int j = 0; j < 6; ++j) {
 		for (int i = 0; i < 784; ++i) {
-			((double *)features->layer1_f[j])[i] = ((int32 *)features->layer1[j])[i] * lenet->c1_scale * in_scale;
+			((double *)features->layer1_f[j])[i] = ((int32_t *)features->layer1[j])[i] * lenet->c1_scale * in_scale;
 		}
 	}
 
@@ -101,13 +101,13 @@ void lenet_forward(LeNet5 *lenet, Feature *features)
 
     // double再次量化到int8，作为后续输入
     double* l1f = (double*)features->layer1_f;
-    int8* l1q = (int8*)features->layer1_q;
+    int8_t* l1q = (int8_t*)features->layer1_q;
     double l1_scale = quantize(l1f, 6*784, l1q);
     
     // 激活，使用int8
     for (int j = 0; j < 6; ++j) {
 		for (int i = 0; i < 784; ++i) {
-			((int8 *)features->layer1_q[j])[i] = ReLU(((int8 *)features->layer1_q[j])[i]);
+			((int8_t *)features->layer1_q[j])[i] = ReLU(((int8_t *)features->layer1_q[j])[i]);
 		}
 	}
 
@@ -121,10 +121,10 @@ void lenet_forward(LeNet5 *lenet, Feature *features)
             for (int k = 0; k < 14; ++k) {
                 int inputRow = j * 2;
                 int inputCol = k * 2;
-                int8 maxVal = features->layer1_q[i][inputRow][inputCol];
+                int8_t maxVal = features->layer1_q[i][inputRow][inputCol];
                 for (int m = 0; m < pool_size; m++) {
                     for (int n = 0; n < pool_size; n++) {
-                        int8 currentVal = features->layer1_q[i][inputRow + m][inputCol + n];
+                        int8_t currentVal = features->layer1_q[i][inputRow + m][inputCol + n];
                         if (currentVal > maxVal) {
                             maxVal = currentVal;
                         }
@@ -141,17 +141,17 @@ void lenet_forward(LeNet5 *lenet, Feature *features)
     for (int x = 0; x < 6; ++x) {  //6个图像
 		for (int y = 0; y < 16; ++y) {  //16个卷积核
 
-			int8* input = (int8*)features->layer2[x];
-			int8* kernel = (int8*)lenet->weight2_3[x][y];
-			int32* output = (int32*)features->layer3[y];
+			int8_t* input = (int8_t*)features->layer2[x];
+			int8_t* kernel = (int8_t*)lenet->weight2_3[x][y];
+			int32_t* output = (int32_t*)features->layer3[y];
 			
 			int kernel_size = 25;
 			int input_size = (14-5+1) * (14-5+1) * 25;
 
-			int8* input_prepared= (int8*)calloc(input_size, sizeof(int8));
+			int8_t* input_prepared= (int8_t*)calloc(input_size, sizeof(int8_t));
 
 			prepare_conv_data(input, 14, 14, 5, 5, input_prepared);
-			convolution_valid(input_prepared, input_size, kernel, kernel_size, output);
+			convolution(input_prepared, input_size, kernel, kernel_size, output);
 
 			free(input_prepared);
 		}
@@ -160,7 +160,7 @@ void lenet_forward(LeNet5 *lenet, Feature *features)
     // int32的结果反量化到double，然后和double类型的bias相加
     for (int j = 0; j < 16; ++j) {
 		for (int i = 0; i < 100; ++i) {
-			((double *)features->layer3_f[j])[i] = ((int32 *)features->layer3[j])[i] * lenet->c2_scale * l1_scale;
+			((double *)features->layer3_f[j])[i] = ((int32_t *)features->layer3[j])[i] * lenet->c2_scale * l1_scale;
 		}
 	}
 
@@ -173,13 +173,13 @@ void lenet_forward(LeNet5 *lenet, Feature *features)
 
     // double再次量化到int8，作为后续输入
     double* l3f = (double*)features->layer3_f;
-    int8* l3q = (int8*)features->layer3_q;
+    int8_t* l3q = (int8_t*)features->layer3_q;
     double l3_scale = quantize(l3f, 16*100, l3q);
     
     // 激活，使用int8
     for (int j = 0; j < 16; ++j) {
 		for (int i = 0; i < 100; ++i) {
-			((int8 *)features->layer3_q[j])[i] = ReLU(((int8 *)features->layer3_q[j])[i]);
+			((int8_t *)features->layer3_q[j])[i] = ReLU(((int8_t *)features->layer3_q[j])[i]);
 		}
 	}
 
@@ -190,10 +190,10 @@ void lenet_forward(LeNet5 *lenet, Feature *features)
             for (int k = 0; k < 5; ++k) {
                 int inputRow = j * 2;
                 int inputCol = k * 2;
-                int8 maxVal = features->layer3_q[i][inputRow][inputCol];
+                int8_t maxVal = features->layer3_q[i][inputRow][inputCol];
                 for (int m = 0; m < pool_size; m++) {
                     for (int n = 0; n < pool_size; n++) {
-                        int8 currentVal = features->layer3_q[i][inputRow + m][inputCol + n];
+                        int8_t currentVal = features->layer3_q[i][inputRow + m][inputCol + n];
                         if (currentVal > maxVal) {
                             maxVal = currentVal;
                         }
@@ -209,20 +209,20 @@ void lenet_forward(LeNet5 *lenet, Feature *features)
     
     for (int x = 0; x < 16; ++x) {
         for (int y = 0; y < 120; ++y) {
-            int8* input = (int8*)features->layer4[x];
-			int8* kernel = (int8*)lenet->weight4_5[x][y];
-			int32* output = (int32*)features->layer5[y];
+            int8_t* input = (int8_t*)features->layer4[x];
+			int8_t* kernel = (int8_t*)lenet->weight4_5[x][y];
+			int32_t* output = (int32_t*)features->layer5[y];
 
 			int kernel_size = 25;
 			int input_size = 25;
 
-            convolution_valid(input, input_size, kernel, kernel_size, output);
+            convolution(input, input_size, kernel, kernel_size, output);
         }
     }
 
     // int32的结果反量化到double，然后和double类型的bias相加
     for (int i = 0; i < 120; ++i) {
-        ((double *)features->layer5_f[i])[0] = ((int32 *)features->layer5[i])[0] * lenet->c3_scale * l3_scale;
+        ((double *)features->layer5_f[i])[0] = ((int32_t *)features->layer5[i])[0] * lenet->c3_scale * l3_scale;
     }
 
     // 加偏置
@@ -232,20 +232,20 @@ void lenet_forward(LeNet5 *lenet, Feature *features)
 
     // double再次量化到int8，作为后续输入
     double* l5f = (double*)features->layer5_f;
-    int8* l5q = (int8*)features->layer5_q;
+    int8_t* l5q = (int8_t*)features->layer5_q;
     double l5_scale = quantize(l5f, 120, l5q);
 	
     // 激活，使用int8
     for (int i = 0; i < 120; ++i) {
-        ((int8 *)features->layer5_q[i])[0] = ReLU(((int8 *)features->layer5_q[i])[0]);
+        ((int8_t *)features->layer5_q[i])[0] = ReLU(((int8_t *)features->layer5_q[i])[0]);
     }
 
     
     // 全连接层 =====================================================================================================================================
     
-    int8* input = (int8*)features->layer5_q;
-    int8* weights = (int8*)lenet->weight5_6;
-    int32* output = (int32*)features->output;
+    int8_t* input = (int8_t*)features->layer5_q;
+    int8_t* weights = (int8_t*)lenet->weight5_6;
+    int32_t* output = (int32_t*)features->output;
 
     fully_connected(input, weights, 120, 10, output); 
 

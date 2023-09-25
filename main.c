@@ -9,14 +9,14 @@
 #define FILE_TRAIN_LABEL		"train-labels-idx1-ubyte"
 #define FILE_TEST_IMAGE		"t10k-images-idx3-ubyte"
 #define FILE_TEST_LABEL		"t10k-labels-idx1-ubyte"
-#define COUNT_TEST		10000
+#define COUNT_TEST		100
 
-int testing(LeNet5 *lenet, image *test_data, uint8 *test_label,int total_size)
+int testing(LeNet5 *lenet, image *test_data, uint8_t *test_label,int total_size)
 {
 	int right = 0, percent = 0;
 	for (int i = 0; i < total_size; ++i)
 	{
-		uint8 l = test_label[i];
+		uint8_t l = test_label[i];
 		int p = Predict(lenet, test_data[i], 10);
 		right += l == p;
 		if (i * 100 / total_size > percent)
@@ -28,7 +28,7 @@ int testing(LeNet5 *lenet, image *test_data, uint8 *test_label,int total_size)
 
 void test(){
 	image *test_data = (image *)calloc(COUNT_TEST, sizeof(image));
-	uint8 *test_label = (uint8 *)calloc(COUNT_TEST, sizeof(uint8));
+	uint8_t *test_label = (uint8_t *)calloc(COUNT_TEST, sizeof(uint8_t));
 	if (read_data(test_data, test_label, COUNT_TEST, FILE_TEST_IMAGE, FILE_TEST_LABEL))
 	{
 		printf("ERROR!!!\nDataset File Not Find!Please Copy Dataset to the Folder Included the main.c\n");
@@ -42,7 +42,9 @@ void test(){
 	}
 
 	clock_t start = clock();
+
 	int right = testing(lenet, test_data, test_label, COUNT_TEST);
+
 	printf("%d/%d\n", right, COUNT_TEST);
 	printf("Time:%u\n", (unsigned)(clock() - start));
 

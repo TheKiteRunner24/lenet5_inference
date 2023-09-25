@@ -4,7 +4,7 @@ CC = gcc
 
 CFLAGS = -lm -g
 
-SRCS = lenet.c main.c lenet_forward.c cnnapi_base.c utils.c
+SRCS = lenet.c main.c lenet_forward.c cnnapi.c normal_instr.c utils.c
 
 TARGET = lenet
 
