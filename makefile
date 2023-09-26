@@ -2,14 +2,20 @@
 
 CC = gcc
 
-CFLAGS = -lm -g
+CFLAGS = -g
+LDFLAGS = -lm
 
-SRCS = lenet.c main.c lenet_forward.c cnnapi.c normal_instr.c utils.c
+SRCDIR = src
+INCDIR = include
+
+#SRCS = $(wildcard $(SRCDIR)/*.c)
+SRCS = $(SRCDIR)/main.c $(SRCDIR)/lenet.c $(SRCDIR)/lenet_forward.c $(SRCDIR)/cnnapi.c $(SRCDIR)/normal_instr.c $(SRCDIR)/utils.c
+INCLUDES = -I$(INCDIR)
 
 TARGET = lenet
 
 $(TARGET): $(SRCS)
-	$(CC) $(SRCS) -o $(TARGET) $(CFLAGS)
+	$(CC) $(INCLUDES) $(SRCS) -o $(TARGET) $(LDFLAGS) $(CFLAGS)
 
 download:
 	wget -c http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz

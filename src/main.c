@@ -9,7 +9,7 @@
 #define FILE_TRAIN_LABEL		"train-labels-idx1-ubyte"
 #define FILE_TEST_IMAGE		"t10k-images-idx3-ubyte"
 #define FILE_TEST_LABEL		"t10k-labels-idx1-ubyte"
-#define COUNT_TEST		100
+#define COUNT_TEST		10000
 
 int testing(LeNet5 *lenet, image *test_data, uint8_t *test_label,int total_size)
 {
