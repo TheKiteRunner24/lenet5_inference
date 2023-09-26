@@ -43,12 +43,6 @@ void convolution(const int8_t* input, int input_size,
 
     int n_conv = input_size / kernel_size;
 
-    // //按窗口大小组织成二维数组
-    // int8_t (*input2D)[kernel_size] = (int8_t (*)[kernel_size])input;
-
-    // for(int i = 0; i < n_conv; i++){
-    //     output[i] += conv_single(input2D[i], kernel);
-    // }
     for (int i = 0; i < n_conv; i++) {
         const int8_t *subInput = &input[i * kernel_size];
         output[i] += conv_single(subInput, kernel);
