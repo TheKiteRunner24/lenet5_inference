@@ -1,9 +1,7 @@
 #ifndef __UTILS_H__
 #define __UTILS_H__
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
+
 #include "lenet.h"
 
 

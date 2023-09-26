@@ -1,6 +1,4 @@
-#include <memory.h>
-#include <time.h>
-#include <stdlib.h>
+#include <math.h>
 #include "lenet.h"
 #include "utils.h"
 #include "lenet_forward.h"

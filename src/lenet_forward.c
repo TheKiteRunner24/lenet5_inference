@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <math.h>
 #include "lenet_forward.h"
 
 
