@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-int32_t Conv(int64_t src, int64_t ker, int32_t last, int sew) {
+inline int32_t Conv(int64_t src, int64_t ker, int32_t last, int sew) {
 
     int32_t result = last;
 
