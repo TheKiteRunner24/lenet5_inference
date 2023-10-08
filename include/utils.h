@@ -9,5 +9,7 @@ int read_data(unsigned char(*data)[28][28], unsigned char label[], const int cou
 
 int load_quantized_model(LeNet5 *lenet, char filename[]);
 
+void print_quantized_model(LeNet5 *lenet, char filename[]);
+
 
 #endif
