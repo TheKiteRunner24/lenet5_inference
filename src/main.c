@@ -58,13 +58,13 @@ void test(){
 int main()
 {
 
-	//test(); // 使用低精度模型进行推理
+	test(); // 使用低精度模型进行推理
 
-	LeNet5 *lenet = (LeNet5 *)malloc(sizeof(LeNet5));
-	FILE *fp = fopen("quantized_model.dat", "rb");
-	fread(lenet, sizeof(LeNet5), 1, fp);
-	print_quantized_model(lenet, "print_model");
-	fclose(fp);
+	// LeNet5 *lenet = (LeNet5 *)malloc(sizeof(LeNet5));
+	// FILE *fp = fopen("quantized_model.dat", "rb");
+	// fread(lenet, sizeof(LeNet5), 1, fp);
+	// print_quantized_model(lenet, "print_model");
+	// fclose(fp);
 	
 	return 0;
 }
